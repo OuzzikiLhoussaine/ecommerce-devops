@@ -6,21 +6,22 @@ const assert = require('node:assert');
 process.env.MONGO_URL = process.env.TEST_MONGO_URL || 'mongodb://127.0.0.1:27017';
 process.env.MONGO_DB = 'catalogue_test';
 
-const { app, connectMongo, clearTestCollections } = require('../src/app.js');
+const { app, connectMongo, closeMongo } = require('../src/app.js');
 
 let server;
 let base;
 
 before(async () => {
+  // connectMongo charge les produits de demo si la collection est vide
   await connectMongo();
-  await clearTestCollections();
   server = app.listen(0);
   await new Promise((r) => server.on('listening', r));
   base = `http://127.0.0.1:${server.address().port}`;
 });
 
 after(async () => {
-  if (server) server.close();
+  await new Promise((r) => server.close(r));
+  await closeMongo();
 });
 
 test('GET /healthz -> ok', async () => {

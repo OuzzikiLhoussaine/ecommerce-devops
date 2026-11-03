@@ -52,10 +52,14 @@ app.use('/healthz', (_req, res) => {
   res.json({ status: 'ok', service: SERVICE, version: APP_VERSION });
 });
 
-// Verifie la disponibilite des 3 microservices en amont
+// Verifie la disponibilite des 3 microservices en amont (info).
+// NB: la reponse reste 200 meme si un amont est en panne — sinon la
+// sonde readiness retirerait le pod des endpoints et le NodePort
+// deviendrait injoignable, ce qui genererait une 2eme alerte Nagios
+// (redondante) lors de la panne d'un seul microservice.
 app.get('/readyz', async (_req, res) => {
   const keys = Object.keys(UPSTREAMS);
-  const results = await Promise.all(keys.map(async (name) => {
+  const dependencies = await Promise.all(keys.map(async (name) => {
     try {
       const r = await fetch(`${UPSTREAMS[name]}/healthz`, { signal: AbortSignal.timeout(1500) });
       return { service: name, ok: r.ok };
@@ -63,8 +67,8 @@ app.get('/readyz', async (_req, res) => {
       return { service: name, ok: false };
     }
   }));
-  const ok = results.every((r) => r.ok);
-  res.status(ok ? 200 : 503).json({ status: ok ? 'ready' : 'degraded', dependencies: results });
+  const ok = dependencies.every((r) => r.ok);
+  res.json({ status: ok ? 'ready' : 'degraded', dependencies });
 });
 
 app.use('/api/catalogue', proxy('catalogue', UPSTREAMS.catalogue));

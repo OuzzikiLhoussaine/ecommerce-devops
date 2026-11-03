@@ -29,10 +29,11 @@ test('GET /healthz -> ok', async () => {
   assert.equal(body.service, 'gateway');
 });
 
-test('GET /readyz -> 503 quand un microservice amont est en panne', async () => {
+test('GET /readyz -> 200 mais "degraded" quand un amont est en panne (readiness ne doit pas dependre des microservices)', async () => {
   const res = await fetch(`${base}/readyz`);
   const body = await res.json();
-  assert.equal(res.status, 503);
+  assert.equal(res.status, 200);
+  assert.equal(body.status, 'degraded');
   assert.ok(body.dependencies.some((d) => d.ok === false));
 });
 

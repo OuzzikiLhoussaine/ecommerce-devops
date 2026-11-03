@@ -7,7 +7,8 @@ services:
     volumes:
       # Supervision des 4 composants via les NodePorts exposes par kind
       - ./etc/conf.d:/opt/nagios/etc/conf.d
+      - ./etc/htpasswd.users:/opt/nagios/etc/htpasswd.users
     environment:
       NAGIOSADMIN_USER: nagiosadmin
-      NAGIOSADM_PASSWORD: nagios-admin
+      NAGIOSADMIN_PASS: nagios-admin
     restart: unless-stopped

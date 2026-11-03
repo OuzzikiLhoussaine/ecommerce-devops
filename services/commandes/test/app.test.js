@@ -6,7 +6,7 @@ const assert = require('node:assert');
 process.env.MONGO_URL = process.env.TEST_MONGO_URL || 'mongodb://127.0.0.1:27017';
 process.env.MONGO_DB = 'commandes_test';
 
-const { app, connectMongo, clearTestCollections } = require('../src/app.js');
+const { app, connectMongo, clearTestCollections, closeMongo } = require('../src/app.js');
 
 let server;
 let base;
@@ -20,7 +20,8 @@ before(async () => {
 });
 
 after(async () => {
-  if (server) server.close();
+  await new Promise((r) => server.close(r));
+  await closeMongo();
 });
 
 const USER = `test-user-${Math.random().toString(36).slice(2)}`;

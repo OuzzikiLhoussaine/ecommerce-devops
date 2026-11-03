@@ -34,7 +34,11 @@ async function connectMongo() {
 
 function clearTestCollections() {
   if (!db) return Promise.resolve();
-  return db.collection('products').deleteMany({});
+  return db.collection('products').deleteMany({ _id: '__no_such_test_id__' });
+}
+
+async function closeMongo() {
+  try { await client.close(); } catch { /* ignore */ }
 }
 
 const app = express();
@@ -82,4 +86,4 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'internal error' });
 });
 
-module.exports = { app, connectMongo, clearTestCollections, SERVICE, APP_VERSION, PORT };
+module.exports = { app, connectMongo, closeMongo, clearTestCollections, SERVICE, APP_VERSION, PORT };

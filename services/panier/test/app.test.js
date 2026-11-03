@@ -8,7 +8,7 @@ process.env.MONGO_DB = 'panier_test';
 // Aucun catalogue de disponible pendant les tests -> fallback "unreachable"
 process.env.CATALOGUE_URL = '';
 
-const { app, connectMongo, clearTestCollections } = require('../src/app.js');
+const { app, connectMongo, clearTestCollections, closeMongo } = require('../src/app.js');
 
 let server;
 let base;
@@ -22,7 +22,8 @@ before(async () => {
 });
 
 after(async () => {
-  if (server) server.close();
+  await new Promise((r) => server.close(r));
+  await closeMongo();
 });
 
 const USER = { headers: Object.fromEntries([['x-user-id', `test-user-${Math.random().toString(36).slice(2)}`]]) };
