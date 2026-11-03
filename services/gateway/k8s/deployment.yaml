@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: ecommerce
+  labels:
+    app: gateway
+    tier: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+        version: "1.0.0"
+    spec:
+      containers:
+        - name: gateway
+          image: localhost:5000/ecommerce/gateway:v1.0.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: CATALOGUE_URL
+              value: http://catalogue:3000
+            - name: PANIER_URL
+              value: http://panier:3000
+            - name: COMMANDES_URL
+              value: http://commandes:3000
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 3000
+            initialDelaySeconds: 8
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: ecommerce
+  labels:
+    app: gateway
+spec:
+  type: NodePort
+  selector:
+    app: gateway
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      nodePort: 30080

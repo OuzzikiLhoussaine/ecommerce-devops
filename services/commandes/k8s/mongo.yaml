@@ -1,0 +1,59 @@
+# Base de donnees DEDIEE au microservice commandes
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-commandes
+  namespace: ecommerce
+  labels:
+    app: mongo-commandes
+spec:
+  serviceName: mongo-commandes
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-commandes
+  template:
+    metadata:
+      labels:
+        app: mongo-commandes
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-commandes
+  namespace: ecommerce
+  labels:
+    app: mongo-commandes
+spec:
+  type: ClusterIP
+  selector:
+    app: mongo-commandes
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: 27017

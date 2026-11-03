@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: panier
+  namespace: ecommerce
+  labels:
+    app: panier
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: panier
+  template:
+    metadata:
+      labels:
+        app: panier
+        version: "1.0.0"
+    spec:
+      containers:
+        - name: panier
+          image: localhost:5000/ecommerce/panier:v1.0.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MONGO_URL
+              value: mongodb://mongo-panier:27017
+            - name: CATALOGUE_URL
+              value: http://catalogue:3000
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: panier
+  namespace: ecommerce
+  labels:
+    app: panier
+spec:
+  type: NodePort
+  selector:
+    app: panier
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      nodePort: 30082

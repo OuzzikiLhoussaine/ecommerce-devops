@@ -1,0 +1,5 @@
+node_modules/
+*.log
+.env
+infra/jenkins/kubeconfig
+.DS_Store

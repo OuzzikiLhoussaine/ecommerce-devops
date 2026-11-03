@@ -1,0 +1,17 @@
+services:
+  jenkins:
+    build: .
+    container_name: jenkins
+    ports:
+      - "8081:8080"    # UI Jenkins
+      - "50001:50000"  # agents JNLP
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock   # build/push images via le docker hote
+      - ./kubeconfig:/var/jenkins_home/.kube/config:ro  # acces cluster kind
+    extra_hosts:
+      - "host.docker.internal:host-gateway"         # acces au mongo de test + API server
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:

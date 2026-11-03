@@ -1,0 +1,62 @@
+# Base de donnees DEDIEE au microservice catalogue
+# Justification: une base par service = isolation des donnees,
+# schema evolutif independamment, et panne d'une base qui n'impacte
+# pas les autres microservices.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-catalogue
+  namespace: ecommerce
+  labels:
+    app: mongo-catalogue
+spec:
+  serviceName: mongo-catalogue
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-catalogue
+  template:
+    metadata:
+      labels:
+        app: mongo-catalogue
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-catalogue
+  namespace: ecommerce
+  labels:
+    app: mongo-catalogue
+spec:
+  type: ClusterIP
+  selector:
+    app: mongo-catalogue
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: 27017

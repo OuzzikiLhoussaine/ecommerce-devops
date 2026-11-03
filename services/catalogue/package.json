@@ -1,0 +1,15 @@
+{
+  "name": "@ecommerce/catalogue",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Microservice catalogue produits (plateforme e-commerce simplifiee)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongodb": "^6.8.0"
+  }
+}

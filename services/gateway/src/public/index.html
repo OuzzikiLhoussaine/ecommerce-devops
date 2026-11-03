@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Boutique E-commerce (demo DevOps)</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; color: #222; }
+  header { display: flex; justify-content: space-between; align-items: center; }
+  h1 { font-size: 1.4rem; }
+  .user { font-size: .85rem; }
+  .card { border: 1px solid #ddd; border-radius: 8px; padding: .8rem 1rem; margin: .5rem 0; }
+  .price { color: #067a46; font-weight: bold; }
+  button { cursor: pointer; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  section { margin-top: 2rem; }
+  .status { font-size: .8rem; color: #777; }
+  li { margin: .2rem 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛒 Boutique — plateforme e-commerce simplifiée</h1>
+  <div class="user">
+    <label>Utilisateur: <input id="userId" value="client-1" size="10"></label>
+    <span class="status" id="gatewayStatus"></span>
+  </div>
+</header>
+
+<section id="catalogue">
+  <h2>Catalogue <button onclick="loadProducts()">↻</button></h2>
+  <div id="products" class="grid"></div>
+</section>
+
+<section id="cart">
+  <h2>🧺 Panier <button onclick="loadCart()">↻</button> <button onclick="checkout()">Passer commande</button></h2>
+  <div id="cartBox"></div>
+</section>
+
+<section id="orders">
+  <h2>📦 Mes commandes <button onclick="loadOrders()">↻</button></h2>
+  <div id="ordersBox"></div>
+</section>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const userId = () => $('userId').value.trim() || 'guest';
+const h = (extra = {}) => ({ 'content-type': 'application/json', 'x-user-id': userId(), ...extra });
+const money = (n) => n.toFixed(2) + ' €';
+
+async function loadProducts() {
+  try {
+    const products = await (await fetch('/api/catalogue/products')).json();
+    $('products').innerHTML = '';
+    for (const p of products) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const name = document.createElement('b'); name.textContent = `${p.name}`;
+      const price = document.createElement('div'); price.className = 'price'; price.textContent = money(p.price);
+      const btn = document.createElement('button');
+      btn.textContent = 'Ajouter au panier';
+      btn.onclick = () => addToCart(p.id);
+      card.append(name, price, btn);
+      $('products').append(card);
+    }
+  } catch (e) { $('products').textContent = 'Catalogue indisponible'; }
+}
+
+async function addToCart(productId) {
+  await fetch('/api/panier/cart/items', {
+    method: 'POST', headers: h(),
+    body: JSON.stringify({ productId, quantity: 1 }),
+  });
+  await loadCart();
+}
+
+async function loadCart() {
+  const cart = await (await fetch('/api/panier/cart', { headers: { 'x-user-id': userId() } })).json();
+  const box = $('cartBox');
+  box.innerHTML = '';
+  if (!cart.items.length) {
+    const p = document.createElement('p'); p.textContent = '(panier vide)';
+    box.append(p); return;
+  }
+  const ul = document.createElement('ul');
+  for (const it of cart.items) {
+    const li = document.createElement('li');
+    li.textContent = `${it.name} × ${it.quantity} — ${money(it.price * it.quantity)}  `;
+    const rm = document.createElement('button'); rm.textContent = 'retirer';
+    rm.onclick = () => removeFromCart(it.productId);
+    li.append(rm);
+    ul.append(li);
+  }
+  box.append(ul);
+  const subtotal = document.createElement('p');
+  subtotal.innerHTML = `Sous-total : <b>${money(cart.subtotal)}</b>`;
+  box.append(subtotal);
+}
+
+async function removeFromCart(productId) {
+  await fetch(`/api/panier/cart/items/${productId}`, { method: 'DELETE', headers: { 'x-user-id': userId() } });
+  await loadCart();
+}
+
+// Checkout: panier -> commandes, puis panier vide
+async function checkout() {
+  const cart = await (await fetch('/api/panier/cart', { headers: { 'x-user-id': userId() } })).json();
+  if (!cart.items.length) return alert('Panier vide');
+  await fetch('/api/commandes/orders', {
+    method: 'POST', headers: h(),
+    body: JSON.stringify({ userId: userId(), items: cart.items }),
+  });
+  await fetch('/api/panier/cart', { method: 'DELETE', headers: { 'x-user-id': userId() } });
+  await loadCart(); await loadOrders();
+}
+
+async function loadOrders() {
+  const orders = await (await fetch(`/api/commandes/orders/${userId()}`)).json();
+  const box = $('ordersBox');
+  box.innerHTML = '';
+  if (!orders.length) { box.textContent = '(aucune commande)'; return; }
+  for (const o of orders) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const head = document.createElement('b');
+    head.textContent = `${new Date(o.createdAt).toLocaleString()} — ${money(o.total)}`;
+    const ul = document.createElement('ul');
+    for (const it of o.items) {
+      const li = document.createElement('li');
+      li.textContent = `${it.name} × ${it.quantity}`;
+      ul.append(li);
+    }
+    card.append(head, ul);
+    box.append(card);
+  }
+}
+
+addEventListener('change', () => { loadCart(); loadOrders(); });
+(async () => {
+  const r = await (await fetch('/healthz')).json();
+  $('gatewayStatus').textContent = `${r.service} v${r.version}`;
+})();
+loadProducts(); loadCart(); loadOrders();
+</script>
+</body>
+</html>

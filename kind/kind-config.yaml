@@ -1,0 +1,28 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+# Expose l'API server sur toutes les interfaces pour que le conteneur
+# Jenkins (kubectl) puisse l'atteindre via host.docker.internal.
+networking:
+  apiServerAddress: "0.0.0.0"
+  apiServerPort: 6443
+# Les images poussées sur localhost:5000 sont servies par le registre
+# local "kind-registry" (attache au reseau docker "kind").
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5000"]
+    endpoint = ["http://kind-registry:5000"]
+nodes:
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 30080   # gateway   (API Gateway / frontend)
+    hostPort: 30080
+    listenAddress: "0.0.0.0"
+  - containerPort: 30081   # catalogue (API directe, pour Nagios)
+    hostPort: 30081
+    listenAddress: "0.0.0.0"
+  - containerPort: 30082   # panier    (API directe, pour Nagios)
+    hostPort: 30082
+    listenAddress: "0.0.0.0"
+  - containerPort: 30083   # commandes (API directe, pour Nagios)
+    hostPort: 30083
+    listenAddress: "0.0.0.0"

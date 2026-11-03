@@ -1,0 +1,14 @@
+{
+  "name": "@ecommerce/gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API Gateway - point d'entree unique de la plateforme e-commerce",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

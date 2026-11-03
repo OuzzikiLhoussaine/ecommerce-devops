@@ -1,0 +1,69 @@
+// Pipeline CI/CD de l'API GATEWAY (point d'entree unique).
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
+  triggers {
+    pollSCM('H/5 * * * *')
+  }
+
+  environment {
+    SERVICE = 'gateway'
+    SERVICE_DIR = 'services/gateway'
+    REGISTRY = 'localhost:5000'
+  }
+
+  stages {
+    stage('Resolve version') {
+      steps {
+        script {
+          env.APP_VERSION = readFile("${env.SERVICE_DIR}/VERSION").trim()
+          env.IMAGE = "${env.REGISTRY}/ecommerce/${env.SERVICE}"
+          env.TAG = "v${env.APP_VERSION}-${env.BUILD_NUMBER}"
+          echo "Gateway version ${env.APP_VERSION} -> ${env.IMAGE}:${env.TAG}"
+        }
+      }
+    }
+
+    stage('Tests') {
+      steps {
+        sh "cd ${SERVICE_DIR} && npm install && npm test"
+      }
+    }
+
+    stage('Build image Docker') {
+      steps {
+        sh "cd ${SERVICE_DIR} && docker build --build-arg APP_VERSION=${APP_VERSION} -t ${IMAGE}:${TAG} ."
+        sh "cd ${SERVICE_DIR} && docker tag ${IMAGE}:${TAG} ${IMAGE}:v${APP_VERSION}"
+      }
+    }
+
+    stage('Push registre') {
+      steps {
+        sh "docker push ${IMAGE}:${TAG}"
+        sh "docker push ${IMAGE}:v${APP_VERSION}"
+      }
+    }
+
+    stage('Deploy Kubernetes') {
+      steps {
+        sh "kubectl apply -f ${SERVICE_DIR}/k8s/"
+        sh "kubectl -n ecommerce set image deployment/${SERVICE} ${SERVICE}=${IMAGE}:${TAG}"
+        sh "kubectl -n ecommerce rollout status deployment/${SERVICE} --timeout=120s"
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "SUCCES: ${SERVICE} ${TAG} deploye sur le cluster."
+    }
+    always {
+      cleanWs()
+    }
+  }
+}

@@ -1,0 +1,13 @@
+services:
+  nagios:
+    image: jasonrivers/nagios:latest
+    container_name: nagios
+    ports:
+      - "8082:80"
+    volumes:
+      # Supervision des 4 composants via les NodePorts exposes par kind
+      - ./etc/conf.d:/opt/nagios/etc/conf.d
+    environment:
+      NAGIOSADMIN_USER: nagiosadmin
+      NAGIOSADM_PASSWORD: nagios-admin
+    restart: unless-stopped
