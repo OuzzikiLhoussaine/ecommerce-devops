@@ -7,6 +7,8 @@ services:
     volumes:
       # Supervision des 4 composants via les NodePorts exposes par kind
       - ./etc/conf.d:/opt/nagios/etc/conf.d
+      # Remplace la config par defaut "localhost" (supprime les checks HTTP/SSH du conteneur)
+      - ./etc/localhost.cfg:/opt/nagios/etc/objects/localhost.cfg
       - ./etc/htpasswd.users:/opt/nagios/etc/htpasswd.users
     environment:
       NAGIOSADMIN_USER: nagiosadmin
