@@ -113,7 +113,7 @@ services/
   commandes/          # POST /orders, GET /orders/:userId + Mongo
   gateway/            # reverse-proxy /api/* + page démo (http://localhost:30080)
 infra/
-  jenkins/            # image Jenkins (docker+node+kubectl), plugins.txt
+  jenkins/            # image Jenkins (docker+node+kubectl), plugins.txt, create-jobs.sh
   nagios/             # supervision des 4 NodePorts, alertes
 kind/                 # config kind (NodePorts 30080-83, miroir registre)
 k8s/00-namespace.yaml

@@ -72,7 +72,9 @@ pipeline {
       echo "SUCCES: ${SERVICE} ${TAG} deploye sur le cluster."
     }
     always {
-      cleanWs()
+      node {
+        cleanWs()
+      }
     }
   }
 }

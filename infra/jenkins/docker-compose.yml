@@ -1,7 +1,11 @@
 services:
   jenkins:
     build: .
-    container_name: jenkins
+    container_name: jenkins-devops
+    # Le socket docker hote est monte root:root 660 :
+    # on ajoute le groupe root (0) au user jenkins pour le droit rw.
+    group_add:
+      - "0"
     ports:
       - "8081:8080"    # UI Jenkins
       - "50001:50000"  # agents JNLP
@@ -9,8 +13,17 @@ services:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock   # build/push images via le docker hote
       - ./kubeconfig:/var/jenkins_home/.kube/config:ro  # acces cluster kind
+      # Repo Git du projet monte au MEME chemin qu'en local :
+      # les jobs poll les Jenkinsfile via file:///home/ouzziki/ecommerce-devops
+      - /home/ouzziki/ecommerce-devops:/home/ouzziki/ecommerce-devops:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"         # acces au mongo de test + API server
+    environment:
+      # Demo de l'atelier : la source Git est un chemin local file://
+      # finance par le montage du repo. Jenkins interdit les checkouts
+      # locaux par mesure de securite -> on les autorise ici.
+      JAVA_OPTS: "-Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true"
+      KUBECONFIG: /var/jenkins_home/.kube/config
     restart: unless-stopped
 
 volumes:

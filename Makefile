@@ -51,11 +51,12 @@ jenkins-kubeconfig:
 	mkdir -p infra/jenkins
 	sed -e 's/0\.0\.0\.0:6443/host.docker.internal:6443/g' \
 	    -e 's/127\.0\.0\.1:6443/host.docker.internal:6443/g' \
+	    -e 's/certificate-authority-data:.*/insecure-skip-tls-verify: true/' \
 	    "$(KUBECONFIG_FILE)" > infra/jenkins/kubeconfig
 
 jenkins-up: jenkins-kubeconfig
 	docker compose -f infra/jenkins/docker-compose.yml up -d --build
-	@echo ">>> Jenkins: http://localhost:8081"
+	@echo ">>> Jenkins: http://localhost:8081 (mot de passe: docker exec jenkins-devops cat /var/jenkins_home/secrets/initialAdminPassword)"
 
 nagios-up:
 	docker compose -f infra/nagios/docker-compose.yml up -d

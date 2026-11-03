@@ -3,7 +3,7 @@
 const { test, before, after } = require('node:test');
 const assert = require('node:assert');
 
-process.env.MONGO_URL = process.env.TEST_MONGO_URL || 'mongodb://127.0.0.1:27017';
+process.env.MONGO_URL = process.env.MONGO_URL || process.env.TEST_MONGO_URL || 'mongodb://127.0.0.1:27017';
 process.env.MONGO_DB = 'panier_test';
 // Aucun catalogue de disponible pendant les tests -> fallback "unreachable"
 process.env.CATALOGUE_URL = '';
@@ -22,7 +22,7 @@ before(async () => {
 });
 
 after(async () => {
-  await new Promise((r) => server.close(r));
+  await new Promise((r) => (server ? server.close(r) : r()));
   await closeMongo();
 });
 
