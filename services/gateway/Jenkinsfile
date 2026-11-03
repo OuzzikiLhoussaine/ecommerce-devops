@@ -62,7 +62,6 @@ pipeline {
     success {
       echo "SUCCES: ${SERVICE} ${TAG} deploye sur le cluster."
     }
-    always {}
 
   }
 }
