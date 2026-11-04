@@ -1,15 +1,12 @@
-<h1 align="center">🛒 NgShop — Plateforme e-commerce simplifiée</h1>
-<p align="center">
-  <b>Rapport technique</b> · Module&nbsp;DevOps&nbsp;II · Mini-projet · Groupe&nbsp;2
-</p>
+# Rapport technique — NgShop, plateforme e-commerce simplifiée
+
+Module DevOps II · Mini-projet · Groupe 2
 
 | | |
 |---|---|
-| 🏫 **Établissement** | Université Abdelmalek Essaâdi · Faculté polydisciplinaire de Larache |
-| 🔗 **Repository** | https://github.com/OuzzikiLhoussaine/ecommerce-devops |
-| 📚 **Documents liés** | `README.md` (installation) · `DEMO.md` (checklist de soutenance) |
-
-![stack](https://img.shields.io/badge/stack-Node.js_20-blue) ![docker](https://img.shields.io/badge/Docker-conteneurisation-2496ED) ![k8s](https://img.shields.io/badge/Kubernetes-kind-326CE5) ![ci](https://img.shields.io/badge/CI/CD-Jenkins-D24939) ![monitor](https://img.shields.io/badge/supervision-Nagios-FF4500) ![tests](https://img.shields.io/badge/tests-17/17-success)
+| **Établissement** | Université Abdelmalek Essaâdi · Faculté polydisciplinaire de Larache |
+| **Repository** | https://github.com/OuzzikiLhoussaine/ecommerce-devops |
+| **Documents liés** | `README.md` (installation) · `DEMO.md` (checklist de soutenance) |
 
 ---
 
@@ -41,8 +38,8 @@ sur une architecture microservices** et de mettre en oeuvre la chaîne DevOps co
 - la **conteneurisation Docker** et l'**orchestration Kubernetes** ;
 - la **supervision Nagios** avec alertes.
 
-Le déf technique central est le **déploiement indépendant** : montrer que la mise à
-jour de la version 2 du microservice Catalogue est possible **sans redéployer** les
+Le défi technique central est le **déploiement indépendant** : montrer que la mise à
+jour du microservice Catalogue (v2.0.0 → v3.0.0) est possible **sans redéployer** les
 microservices Panier et Commandes (pods inchangés, vérifiable à l'oeil avec
 `kubectl get pods -w`).
 
@@ -88,7 +85,7 @@ flowchart LR
     COM --> MM
 
     JE -->|"build • push • deploy"| RE
-    JE -->|"kubectl set image"| MS1[Deployment du service only]
+    JE -->|"kubectl set image"| MS1[Deployment du service uniquement]
     RE -.->|"`pull` via miroir containerd"| MS1
     NA -->|"check_tcp"| CAT & PAN & COM
     NA -->|"check_tcp"| GW
@@ -114,13 +111,13 @@ Sur l'hôte dev (Linux + Docker) :
 | **commandes** | Passer une commande et consulter son historique | `POST /orders`, `GET /orders/:userId` | MongoDB dédiée (`mongo-commandes`), collection `orders` |
 | **gateway** | Point d'entrée unique + mini-frontend | `proxy /api/<svc>/*`, `/healthz`, `/readyz`, page statique | — |
 
-### Aperçu de la boutique livrée par la gateway (v1.0.2)
+### Aperçu de la boutique livrée par la gateway (v1.0.3)
 
 ![Boutique NgShop — catalogue, panier, commandes](screenshots/ui-full.png)
-*Interface servie par la gateway : le catalogue (cartes produits, prix, badges de stock) vient du microservice catalogue, le panier du microservice panier, l'historique du microservice commandes — le tout via le point d'entrée unique :30080.*
+*Interface servie par la gateway : le catalogue (cartes produits avec photos, prix, badges de stock) vient du microservice catalogue, le panier du microservice panier, l'historique du microservice commandes — le tout via le point d'entrée unique :30080.*
 
 ![Panier rempli — badge et sous-total](screenshots/ui-cart.png)
-*Panier utilisateur (badge 🧺 3, sous-total 318,80 €) : chaque appel passe par la gateway qui propage `x-user-id` vers le microservice panier ; les commandes déjà passées sont listées par le microservice commandes.*
+*Panier utilisateur (badge 3, sous-total 318,80 €) : chaque appel passe par la gateway qui propage `x-user-id` vers le microservice panier ; les commandes déjà passées sont listées par le microservice commandes.*
 
 ### 3.1 Pourquoi une base de données par service ?
 
@@ -167,7 +164,7 @@ la gateway), ce qui polluerait la lecture du scénario "arrêt d'un microservice
 | **Node.js 20 / Express** | Écosystème maîtrisé, image alpine légère (~50 Mo), démarrage rapide |
 | **MongoDB 7 + driver officiel** | Document store pratique (panier, commandes), état au format JSON, StatefulSet simple |
 | **kind** | Cluster K8S réel sur laptop, miroirs containerd vers le registre local, NodePorts mappés (démonstration compatible) |
-| **Registre local `kind-registry`** | Cycles de publie/pull sans dépendre de Docker Hub ; mappé sur le réseau Docker `kind` pour résolution DNS depuis les nœuds |
+| **Registre local `kind-registry`** | Cycles de publication/pull sans dépendre de Docker Hub ; mappé sur le réseau Docker `kind` pour résolution DNS depuis les nœuds |
 | **NodePort au travers d'Ingress** | Zéro dépendance externe (pas de cert-manager/load balancer), accès direct à chaque service → c'est aussi ce qui permet le check_tcp de Nagios vers chaque microservice |
 | **Jenkins en conteneur (image maison LTS + docker cli + kubectl + node)** | Reproductibilité : tout est décrit dans le Dockerfile + `plugins.txt` |
 
@@ -177,9 +174,9 @@ la gateway), ce qui polluerait la lecture du scénario "arrêt d'un microservice
 
 ### 4.1 Versionning
 
-- Chaque microservice posséde **son fichier `services/<svc>/VERSION`** (ex: `2.0.0`).
+- Chaque microservice possède **son fichier `services/<svc>/VERSION`** (ex: `2.0.0`).
 - Une image est étiquetée **deux fois** :
-  - `v<VERSION>-b<BUILD>` : tag **immuable** tracing exactement le build Jenkins ;
+  - `v<VERSION>-b<BUILD>` : tag **immuable** reflétant exactement le build Jenkins ;
   - `v<VERSION>` : alias "courant" de la version majeure (utile aux rollback expérimentaux).
 - Le pipeline **relit la VERSION à chaque build** : il suffit de changer le fichier
   pour créer une nouvelle version de service ; les autres services gardent leur
@@ -241,23 +238,23 @@ même âge.
 
 - `pollSCM('H/5 * * * *')` — à chaque push le pipeline s'exécute (dans la démo on
   force avec *Build Now*).
-- Le pipeline est isolé par service : un commit sur `services/catalogue/` créer un
-  build du job `catalogue` ; l'historique des autres services n'est pas impacté.
+- Le pipeline est isolé par service : un commit sur `services/catalogue/` déclenche un
+  build du seul job `catalogue` ; l'historique des autres services n'est pas impacté.
 
 ### 5.3 qualité / tests
 
-- `node --test` (test runner natuel) par service, au moins 4 tests chacun
+- `node --test` (test runner naturel) par service, au moins 4 tests chacun
   (17 au total), dont **tests d'intégration** avec un conteneur Mongo éphémère
   (port dédié 27017/27018/27019 pour paralléliser les pipelines).
 - La concurrence est gérée par : nom de conteneur de test unique
   `mongo-test-${BUILD_NUMBER}`, et port dédié par service.
-- Verification : poussée de code défaillant → **pipeline rouge**, image non poussée,
+- Vérification : poussée de code défaillant → **pipeline rouge**, image non poussée,
   aucun déploiement (chaine stop à l'étape Tests).
 
 ### 5.4 Registre des images
 
 - `docker push localhost:5000/ecommerce/<svc>:<tag>` (registre attaché au réseau `kind`).
-- Les noeuds kind tirent les images due au *containerdConfigPatches* (miroir
+- Les nœuds kind tirent les images grâce au *containerdConfigPatches* (miroir
   `localhost:5000` → `http://kind-registry:5000`) défini dans `kind/kind-config.yaml`.
 
 ---
@@ -273,7 +270,7 @@ Par microservice (`services/<svc>/k8s/`) :
 
 Gateway : Deployment + NodePort **30080** (pas de BDD).
 
-Vérif : `kubectl -n ecommerce get all forums` :
+Vérification :
 
 ```
 $ kubectl -n ecommerce get deploy,sts,svc,po

@@ -35,19 +35,18 @@ avec **Docker**, orchestrée sur **Kubernetes (kind)**, avec pipelines CI/CD
 
 - Docker
 - [kind](https://kind.sigs.k8s.io/), `kubectl`, `make`
-- (fournis) Node.js n'est requis que sur la machine hôte si tu codes sans Docker.
+- Node.js 20 n'est requis que pour lancer les tests en local, hors Docker.
 
 ## Démarrage
 
 ```bash
 git clone <ce repo> && cd ecommerce-devops
 
-make cluster-up          # kind + registre local localhost:5000 + namespace ecommerce
-make deploy-all          # build/push via... non: build manuel local OU Jenkins
-make build-all && make push-all      # 1er déploiement "manuel" (facultatif si Jenkins ok)
-make deploy-all
-make jenkins-up          # Jenkins sur http://localhost:8081
-make nagios-up           # Nagios sur http://localhost:8082/nagios
+make cluster-up                      # kind + registre local localhost:5000 + namespace ecommerce
+make build-all && make push-all      # build + push des 4 images (ou laisser Jenkins le faire)
+make deploy-all                      # premier déploiement des manifestes Kubernetes
+make jenkins-up                      # Jenkins sur http://localhost:8081
+make nagios-up                       # Nagios sur http://localhost:8082/nagios
 ```
 
 Boutique de démo : **http://localhost:30080**
@@ -76,18 +75,18 @@ Chaque pipeline (voir `services/*/Jenkinsfile`) :
 
 ### Passer une version
 
-Modifie `services/catalogue/VERSION` → `2.0.0`, commit/push, le pipeline
+Modifie `services/catalogue/VERSION` → `3.0.0`, commit/push, le pipeline
 catalogue s'exécute et le catalogue est mis à jour **sans toucher aux pods**
 panier/commandes.
 
-## 🔥 Scénario de démonstration (aligné sur l'énoncé)
+## Scénario de démonstration (aligné sur l'énoncé)
 
 | Étape | Commande / action | Point montré |
 |---|---|---|
 | 1. Dépôts Git | montrer l'arborescence 4 services + 4 Jenkinsfiles | Git |
 | 2. Pipelines Jenkins | 4 jobs, un par service | CI/CD |
 | 3. Build & publication | Builder un pipeline → logs "Push registre" | Docker |
-| 4. **Catalogue v2 uniquement** | `echo 2.0.0 > services/catalogue/VERSION && git commit ...` → pipeline | cycle de version indépendant |
+| 4. **Mise à jour du catalogue uniquement** | `echo 3.0.0 > services/catalogue/VERSION && git commit ...` → pipeline | cycle de version indépendant |
 | 5. Panier/Commandes intacts | `kubectl -n ecommerce get pods -w` pendant l'étape 4 : les âges des pods `panier-*` / `commandes-*` ne changent pas | déploiement isolé |
 | 6. Nagios suit les 4 services | http://localhost:8082/nagios → *Services*, 4 lignes `Up` | supervision |
 | 7. Alerte | `kubectl -n ecommerce scale deployment/panier --replicas=0` → CRITICAL sur "Panier (30082)" dans ~1-2 min | détection |
@@ -131,13 +130,10 @@ Chaque microservice possède sa propre base (StatefulSet `mongo-<svc>` dédiée)
 C'est la structure attendue d'une microservices d'architecture — une base
 partagée créerait un couplage à interdire ici.
 
-## Deployer sur GitHub
+## Publié sur GitHub
 
-```bash
-gh repo create OuzzikiLhoussaine/ecommerce-devops --public --source . --push
-# ou: git remote add origin <url> && git push -u origin main
-```
+Dépôt public du projet : https://github.com/OuzzikiLhoussaine/ecommerce-devops
 
-Les 4 jobs Jenkins pointent sur ce repo (eventuellement ajuster l'URL avec
-`infra/jenkins/create-jobs.sh` + la variable `SCM_REPO`). L'Admin Jenkins:
-- user `admin` (reinitialisable via `infra/jenkins/reset-admin.groovy`).
+Les 4 jobs Jenkins pointent sur ce repo (URL ajustable via
+`infra/jenkins/create-jobs.sh` + la variable `SCM_REPO`). Compte admin Jenkins :
+- user `admin` (mot de passe réinitialisable via `infra/jenkins/reset-admin.groovy`)

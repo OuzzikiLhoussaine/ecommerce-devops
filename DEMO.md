@@ -1,19 +1,18 @@
-<h1 align="center">🎬 Démonstration — soutenance DevOps II</h1>
-<p align="center">
-  <b>Plateforme e-commerce microservices</b> · Groupe 2 · ≈ 15 minutes
-</p>
+# Démonstration — soutenance DevOps II
+
+**Plateforme e-commerce microservices** · Groupe 2 · ≈ 15 minutes
 
 | | |
 |---|---|
-| 🎯 **Objectif** | Montrer en direct : Git ↔ Jenkins ↔ Docker ↔ Kubernetes ↔ Nagios, et surtout **la mise à jour d'un microservice sans les autres** |
-| 📚 **Réf. énoncé** | `Group-2.pdf` — « Plateforme e-commerce simplifiée » |
-| 📖 **Docs liées** | `RAPPORT.md` (justifications) · `README.md` (installation) |
+| **Objectif** | Montrer en direct : Git ↔ Jenkins ↔ Docker ↔ Kubernetes ↔ Nagios, et surtout **la mise à jour d'un microservice sans les autres** |
+| **Réf. énoncé** | `Group-2.pdf` — « Plateforme e-commerce simplifiée » |
+| **Docs liées** | `RAPPORT.md` (justifications) · `README.md` (installation) |
 
-☑️ Chronologie prête à l'emploi : cochez les étapes pendant la répétition.
+Chronologie prête à l'emploi : cochez physiquement les étapes pendant la répétition.
 
-**Checklist 24 h avant** : ☐ cluster kind up ☐ Jenkins jobs verts ☐ Nagios 4×OK ☐ boutique http://localhost:30080 ☐ comptes de démonstration pré-crées (panier + commande)
+**Checklist 24 h avant** : cluster kind up · Jenkins jobs verts · Nagios 4×OK · boutique http://localhost:30080 · comptes de démonstration pré-crées (panier + commande)
 
-## ✅ 0. Avant l'arrivée du jury — préparation (10 min)
+## 0. Avant l'arrivée du jury — préparation (10 min)
 
 Vérifier que tout tourne. Si la machine vient d'être redémarrée :
 
@@ -45,17 +44,17 @@ curl -s -X POST http://localhost:30080/api/panier/cart/items \
 
 **Jenkins** : `admin / devops-2026` (réinitialisable via `infra/jenkins/reset-admin.groovy`)
 
-### 📸 Aperçu de la boutique (captures réelles de l'interface livrée par Jenkins)
+### Aperçu de la boutique (captures réelles de l'interface livrée par Jenkins)
 
 ![Boutique NgShop](screenshots/ui-full.png)
 *Interface NgShop servie par la gateway (v1.0.2) : catalogue depuis le microservice catalogue, panier et historique depuis panier/commandes — tous trois derrière le point d'entrée unique :30080.*
 
 ![Panier rempli](screenshots/ui-cart.png)
-*Panier rempli (badge 🧺 3, sous-total 318,80 €) et commandes déjà enregistrées par le microservice commandes.*
+*Panier rempli (badge 3, sous-total 318,80 €) et commandes déjà enregistrées par le microservice commandes.*
 
 ---
 
-## 1️⃣ Le projet & l'architecture (2 min)
+## 1. Le projet & l'architecture (2 min)
 
 Dans un terminal :
 
@@ -70,7 +69,7 @@ Tableau récapitulatif de l'architecture → voir `RAPPORT.md`.
 
 ---
 
-## 2️⃣ Git — gestion du code (1 min)
+## 2. Git — gestion du code (1 min)
 
 ```bash
 cd ~/ecommerce-devops && git log --oneline | head -10
@@ -83,7 +82,7 @@ indépendant), l'historique qui documente les évolutions.
 
 ---
 
-## 3️⃣ Jenkins — 4 pipelines indépendants (3 min)
+## 3. Jenkins — 4 pipelines indépendants (3 min)
 
 Onglet Jenkins : les 4 jobs (`catalogue`, `panier`, `commandes`, `gateway`).
 
@@ -98,7 +97,7 @@ Déclencher manuellement un build de **catalogue** (bouton *Build Now*) pour la 
 
 ---
 
-## 4️⃣ Docker — build & publication des images (1,5 min)
+## 4. Docker — build & publication des images (1,5 min)
 
 Pendant que le build tourne, montrer :
 
@@ -112,7 +111,7 @@ Puis dans la console Jenkins : **"Push registre"** → digests poussés du build
 
 ---
 
-## 5️⃣ 🔥 LE point clé : déploiement de Catalogue v2 SANS les autres (4 min)
+## 5. LE point clé : mise à jour du catalogue SANS les autres (4 min)
 
 **Étape 1** — préparer l'écoute des pods dans un terminal (garder à l'écran) :
 
@@ -141,9 +140,9 @@ Jenkins suit `pollSCM('H/5 * * * *')` — pour aller vite pendant la démo, cliq
 
 **Étape 3** — vérifier dans la vue `watch` :
 
-- ✅ le pod `catalogue-…` se recrée (nouveau nom, âge en secondes)
-- ✅ `panier-…` / `commandes-…` **gardent leurs noms et leurs âges** → jamais redéployés
-- ✅ `deployment/catalogue` image = `…/catalogue:v3.0.0-<build>`
+- le pod `catalogue-…` se recrée (nouveau nom, âge en secondes)
+- `panier-…` / `commandes-…` **gardent leurs noms et leurs âges** → jamais redéployés
+- `deployment/catalogue` image = `…/catalogue:v3.0.0-<build>`
 
 ```bash
 kubectl -n ecommerce get deploy catalogue \
@@ -153,11 +152,11 @@ curl -s http://localhost:30081/healthz        # version: "2.0.0" (ou 3.0.0)
 
 **Étape 4** — l'application reste fonctionnelle pendant/après :
 boutique http://localhost:30080 → ajouter au panier → commander → historique
-(captures réelles ci-dessus, section 📸 Aperçu).
+(captures réelles ci-dessus, section Aperçu).
 
 ---
 
-## 6️⃣ Kubernetes — orchestration (1,5 min)
+## 6. Kubernetes — orchestration (1,5 min)
 
 ```bash
 kubectl get ns
@@ -171,7 +170,7 @@ kubectl -n ecommerce describe deploy catalogue | grep -A6 "Environment\|Probe" |
 
 ---
 
-## 7️⃣ Nagios — supervision individuelle (2,5 min)
+## 7. Nagios — supervision individuelle (2,5 min)
 
 Onglet Nagios : http://localhost:8082/nagios (login `nagiosadmin` / `nagios-admin`).
 
@@ -193,7 +192,7 @@ kubectl -n ecommerce scale deployment/panier --replicas=0
 Montrer que Catalogue/Commandes/Gateway restent OK grâce à la gateway
 "tolérante aux pannes" (readiness indépendante des services amonts).
 
-📸 Capture réelle de cet état (impossible à figer en live, remise en état juste après) :
+Capture réelle de cet état (impossible à figer en live, remise en état juste après) :
 
 ![Nagios — alerte CRITICAL sur le panier](screenshots/nagios-critical.png)
 *Alerte active : « Microservice Panier » **CRITICAL** (tentatives 2/2, `connect to address 172.17.0.1 and port 30082: Connection refused`) — le total du haut passe à **1 Critical**, tandis que les 3 autres services restent verts : l'alerte est bien **isolée à un seul microservice**.*
@@ -206,7 +205,7 @@ kubectl -n ecommerce scale deployment/panier --replicas=1
 
 → Nagios repasse **OK** (notification de récupération visible dans *Events* / log).
 
-📸 Capture réelle de la récupération :
+Capture réelle de la récupération :
 
 ![Nagios — retour 4/4 OK](screenshots/nagios-recovery.png)
 *Récupération : les 4 services sont à nouveau OK (0 Critical), la durée fraîche (`0d 0h 5m 46s`) du service panier montre qu'il vient de sortir de l'alerte.*
@@ -219,7 +218,7 @@ docker exec nagios grep "SERVICE ALERT" /opt/nagios/var/nagios.log | tail -5
 
 ---
 
-## 8️⃣ Questions prévisibles du jury — réponses
+## 8. Questions prévisibles du jury — réponses
 
 | Question | Réponse courte |
 |---|---|
@@ -232,7 +231,7 @@ docker exec nagios grep "SERVICE ALERT" /opt/nagios/var/nagios.log | tail -5
 
 ---
 
-## 9️⃣ Plan B — si l'environnement doit être reconstruit devant le jury
+## 9. Plan B — si l'environnement doit être reconstruit devant le jury
 
 ```bash
 make down && make cluster-up && make push-all && make deploy-all && sleep 60
