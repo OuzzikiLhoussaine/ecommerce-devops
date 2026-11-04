@@ -65,9 +65,13 @@ pipeline {
 
     stage('Deploy Kubernetes') {
       steps {
-        // 1) appliquer UNIQUEMENT les manifests de ce service
-        //    (StatefulSet mongo + Deployment + Service catalogue)
-        sh "kubectl apply -f ${SERVICE_DIR}/k8s/"
+        // 1) bootstrap : appliquer les manifests UNIQUEMENT si le
+        //    deployment n'existe pas encore (les remanier a chaque build
+        //    reafficherait l'image v1.0.0 avant le set image, donc
+        //    un double rollout du pod a chaque build).
+        sh '''set -o pipefail; \
+           kubectl -n ecommerce get deployment/${SERVICE} >/dev/null 2>&1 || \
+           kubectl apply -f ${SERVICE_DIR}/k8s/'''
         // 2) mise a jour de l'image -> rollout du deployment CATALOGUE seul
         sh "kubectl -n ecommerce set image deployment/${SERVICE} ${SERVICE}=${IMAGE}:${TAG}"
         sh "kubectl -n ecommerce rollout status deployment/${SERVICE} --timeout=120s"
