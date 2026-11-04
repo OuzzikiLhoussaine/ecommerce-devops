@@ -299,6 +299,24 @@ SERVICE ALERT: kind-cluster;Microservice Panier;CRITICAL;HARD;Tenant à 30082 �
 SERVICE ALERT: kind-cluster;Microservice Panier;OK;HARD;TCP OK ← après scale --replicas=1
 ```
 
+Le cycle complet d'alerte (extrait du journal Nagios) :
+
+```
+SERVICE ALERT: kind-cluster;Microservice Panier;CRITICAL;SOFT;1;connect to address 172.17.0.1 and port 30082: Connection refused   ← 1re tentative
+SERVICE ALERT: kind-cluster;Microservice Panier;CRITICAL;HARD;2;connect to address 172.17.0.1 and port 30082: Connection refused   ← 2e tentative → alarme + notification
+SERVICE ALERT: kind-cluster;Microservice Panier;OK;HARD;1;TCP OK - 0.001 second response time on 172.17.0.1 port 30082             ← récupération
+```
+
+Alerte figée (après `kubectl scale deployment/panier --replicas=0`, ~2 min d'attente) :
+
+![Nagios — alerte CRITICAL](screenshots/nagios-critical.png)
+*« Microservice Panier » en **CRITICAL** (tentative 2/2, connexion refusée sur 30082) — les 3 autres services restent OK : l'alerte ne touche que le microservice défaillant.*
+
+Récupération (après `--replicas=1`) :
+
+![Nagios — retour à l'état OK](screenshots/nagios-recovery.png)
+*Retour automatique à **4/4 OK** sans intervention humaine dans Nagios (pur état, démonstration non simulée).*
+
 ![Carte Nagios — 4 services OK](screenshots/nagios-services.png)
 *Capture réelle de la carte « Service Status Details » : les 4 services (Gateway 30080, Catalogue 30081, Panier 30082, Commandes 30083) sont supervisés individuellement et remontent `TCP Ok` — le tableau du haut confirme 0 critical / 0 warning.*
 

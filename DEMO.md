@@ -193,6 +193,11 @@ kubectl -n ecommerce scale deployment/panier --replicas=0
 Montrer que Catalogue/Commandes/Gateway restent OK grâce à la gateway
 "tolérante aux pannes" (readiness indépendante des services amonts).
 
+📸 Capture réelle de cet état (impossible à figer en live, remise en état juste après) :
+
+![Nagios — alerte CRITICAL sur le panier](screenshots/nagios-critical.png)
+*Alerte active : « Microservice Panier » **CRITICAL** (tentatives 2/2, `connect to address 172.17.0.1 and port 30082: Connection refused`) — le total du haut passe à **1 Critical**, tandis que les 3 autres services restent verts : l'alerte est bien **isolée à un seul microservice**.*
+
 ### 7.3 Retour à l'état normal
 
 ```bash
@@ -200,6 +205,11 @@ kubectl -n ecommerce scale deployment/panier --replicas=1
 ```
 
 → Nagios repasse **OK** (notification de récupération visible dans *Events* / log).
+
+📸 Capture réelle de la récupération :
+
+![Nagios — retour 4/4 OK](screenshots/nagios-recovery.png)
+*Récupération : les 4 services sont à nouveau OK (0 Critical), la durée fraîche (`0d 0h 5m 46s`) du service panier montre qu'il vient de sortir de l'alerte.*
 
 Logs côté serveur si besoin :
 
