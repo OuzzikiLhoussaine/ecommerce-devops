@@ -5,7 +5,6 @@
 | | |
 |---|---|
 | **Objectif** | Montrer en direct : Git ↔ Jenkins ↔ Docker ↔ Kubernetes ↔ Nagios, et surtout **la mise à jour d'un microservice sans les autres** |
-| **Réf. énoncé** | `Group-2.pdf` — « Plateforme e-commerce simplifiée » |
 | **Docs liées** | `RAPPORT.md` (justifications) · `README.md` (installation) |
 
 Chronologie prête à l'emploi : cochez physiquement les étapes pendant la répétition.
@@ -89,7 +88,7 @@ Onglet Jenkins : les 4 jobs (`catalogue`, `panier`, `commandes`, `gateway`).
 - **Historique de builds** : chacun a ses builds green indépendants.
 - Cliquez un build → **Pipeline Steps / Console Output** : montrer les 5 stages :
   `Resolve version → Tests → Build image → Push registre → Deploy Kubernetes`.
-- Réinterpréter le **défi technique** de l'énoncé : *chaque pipeline déploie son
+- Le point à montrer : *chaque pipeline déploie son
   service et ne touche jamais aux autres (aucun `apply` croisé, aucune `set image` croisée).*
 - Le fichier déclencheur : `services/<svc>/Jenkinsfile` + version lue dans `services/<svc>/VERSION`.
 

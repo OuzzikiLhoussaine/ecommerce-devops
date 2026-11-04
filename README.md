@@ -26,7 +26,7 @@ avec **Docker**, orchestrée sur **Kubernetes (kind)**, avec pipelines CI/CD
 
 - Chaque microservice possède **son image Docker**, **son Deployment + Service Kubernetes**
   et **sa propre base de données** (isolation des données, panne non propagée,
-  schéma évolué indépendamment — justification attendue par l'énoncé).
+  schéma évolué indépendamment — sans propagation d'une panne à tout le système).
 - Un seul point d'entrée : la **gateway** expose la page de démo sur
   `http://localhost:30080` et route `/api/catalogue`, `/api/panier`,
   `/api/commandes` vers les 3 services.
@@ -79,7 +79,7 @@ Modifie `services/catalogue/VERSION` → `3.0.0`, commit/push, le pipeline
 catalogue s'exécute et le catalogue est mis à jour **sans toucher aux pods**
 panier/commandes.
 
-## Scénario de démonstration (aligné sur l'énoncé)
+## Scénario de démonstration
 
 | Étape | Commande / action | Point montré |
 |---|---|---|

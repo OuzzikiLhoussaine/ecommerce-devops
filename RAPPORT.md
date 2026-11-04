@@ -121,8 +121,8 @@ Sur l'hôte dev (Linux + Docker) :
 
 ### 3.1 Pourquoi une base de données par service ?
 
-C'est le choix recommandé dans le cadre d'une architecture microservices, l'énoncé
-demandant soit de le faire soit de le justifier :
+C'est le choix standard d'une architecture microservices, motivé ici par
+quatre bénéfices concrets :
 
 1. **Isolation des données et des pannes.** Une panne de `mongo-panier` ne dégrade
    ni le catalogue ni l'historique des commandes. Avec une base partagée, chaque
