@@ -290,6 +290,15 @@
 <div id="toasts"></div>
 
 <script>
+// Mode "capture d'ecran" (?snap) : une ressource fictive ralentit volontairement
+// l'evenement load du navigateur le temps que les microservices repondent
+// (utilise uniquement pour les captures de DEMO.md / RAPPORT.md).
+if (new URLSearchParams(location.search).has('snap')) {
+  const w = document.createElement('img');
+  w.src = `/__snapwait?ms=3000&t=${Date.now()}`;
+  w.style.display = 'none';
+  document.head.append(w);
+}
 const $ = (id) => document.getElementById(id);
 const IMG = {
   'P-001': '/img/keyboard.jpg',

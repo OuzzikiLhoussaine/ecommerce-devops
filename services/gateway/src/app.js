@@ -52,6 +52,16 @@ app.use('/healthz', (_req, res) => {
   res.json({ status: 'ok', service: SERVICE, version: APP_VERSION });
 });
 
+// Hook de capture d'ecran (utilise par la doc de soutenance uniquement) :
+// repond au bout de `ms` millisecondes (max 8000) — permet au navigateur
+// headless de garder l'evenement "load" en attente pendant que le JS
+// de la boutique affiche les donnees recues des microservices.
+app.get('/__snapwait', async (req, res) => {
+  const ms = Math.min(Number.parseInt(req.query.ms, 10) || 0, 8000);
+  await new Promise((r) => setTimeout(r, ms));
+  res.status(204).end();
+});
+
 // Verifie la disponibilite des 3 microservices en amont (info).
 // NB: la reponse reste 200 meme si un amont est en panne — sinon la
 // sonde readiness retirerait le pod des endpoints et le NodePort
