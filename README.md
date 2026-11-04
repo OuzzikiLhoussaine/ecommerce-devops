@@ -130,3 +130,14 @@ Chaque microservice possède sa propre base (StatefulSet `mongo-<svc>` dédiée)
   charge sans partager les ressources.
 C'est la structure attendue d'une microservices d'architecture — une base
 partagée créerait un couplage à interdire ici.
+
+## Deployer sur GitHub
+
+```bash
+gh repo create OuzzikiLhoussaine/ecommerce-devops --public --source . --push
+# ou: git remote add origin <url> && git push -u origin main
+```
+
+Les 4 jobs Jenkins pointent sur ce repo (eventuellement ajuster l'URL avec
+`infra/jenkins/create-jobs.sh` + la variable `SCM_REPO`). L'Admin Jenkins:
+- user `admin` (reinitialisable via `infra/jenkins/reset-admin.groovy`).
