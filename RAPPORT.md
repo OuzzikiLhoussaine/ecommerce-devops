@@ -1,12 +1,34 @@
-# Rapport technique — Plateforme e-commerce simplifiée
+<h1 align="center">🛒 NgShop — Plateforme e-commerce simplifiée</h1>
+<p align="center">
+  <b>Rapport technique</b> · Module&nbsp;DevOps&nbsp;II · Mini-projet · Groupe&nbsp;2
+</p>
 
-**Module DevOps II · Mini-projet · Groupe 2**
-Université Abdelmalek Essaâdi · Faculté polydisciplinaire de Larache
+| | |
+|---|---|
+| 🏫 **Établissement** | Université Abdelmalek Essaâdi · Faculté polydisciplinaire de Larache |
+| 🔗 **Repository** | https://github.com/OuzzikiLhoussaine/ecommerce-devops |
+| 📚 **Documents liés** | `README.md` (installation) · `DEMO.md` (checklist de soutenance) |
 
-> Repository : https://github.com/OuzzikiLhoussaine/ecommerce-devops
-> Documentation associée : `README.md` (installation) · `DEMO.md` (checklist de soutenance)
+![stack](https://img.shields.io/badge/stack-Node.js_20-blue) ![docker](https://img.shields.io/badge/Docker-conteneurisation-2496ED) ![k8s](https://img.shields.io/badge/Kubernetes-kind-326CE5) ![ci](https://img.shields.io/badge/CI/CD-Jenkins-D24939) ![monitor](https://img.shields.io/badge/supervision-Nagios-FF4500) ![tests](https://img.shields.io/badge/tests-17/17-success)
 
 ---
+
+**Sommaire**
+
+1. [Introduction et objectifs](#1-introduction-et-objectifs)
+2. [Architecture générale](#2-architecture-générale)
+3. [Les 4 services du projet](#3-les-4-services-du-projet)
+4. [Versionning & déploiement indépendant](#4-gestion-des-versions--la-stratégie-de-déploiement-indépendant)
+5. [CI/CD Jenkins — détails](#5-cicd-jenkins--détails)
+6. [Déploiement Kubernetes](#6-déploiement-kubernetes--manifestes)
+7. [Supervision Nagios](#7-supervision-nagios)
+8. [Difficultés rencontrées](#8-difficultés-rencontrées-et-résolutions-valeur-ajoutée)
+9. [Améliorations futures](#9-améliorations-futures)
+A. [Annexe A — URLs et identifiants](#annexe-a--urls-et-identifiants)
+B. [Annexe B — Installation](#annexe-b--commandes-résumées-dinstallation)
+
+---
+
 
 ## 1. Introduction et objectifs
 

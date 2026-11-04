@@ -1,11 +1,19 @@
-# 🎬 Scénario de démonstration pour la soutenance
+<h1 align="center">🎬 Démonstration — soutenance DevOps II</h1>
+<p align="center">
+  <b>Plateforme e-commerce microservices</b> · Groupe 2 · ≈ 15 minutes
+</p>
 
-Ce document accompagne `RAPPORT.md` (justifications) et `README.md` (installation).
-Chronologie recommandée : **≈ 15 minutes**.
+| | |
+|---|---|
+| 🎯 **Objectif** | Montrer en direct : Git ↔ Jenkins ↔ Docker ↔ Kubernetes ↔ Nagios, et surtout **la mise à jour d'un microservice sans les autres** |
+| 📚 **Réf. énoncé** | `Group-2.pdf` — « Plateforme e-commerce simplifiée » |
+| 📖 **Docs liées** | `RAPPORT.md` (justifications) · `README.md` (installation) |
 
----
+☑️ Chronologie prête à l'emploi : cochez les étapes pendant la répétition.
 
-## 0. Avant l'arrivée du jury — préparation (10 min)
+**Checklist 24 h avant** : ☐ cluster kind up ☐ Jenkins jobs verts ☐ Nagios 4×OK ☐ boutique http://localhost:30080 ☐ comptes de démonstration pré-crées (panier + commande)
+
+## ✅ 0. Avant l'arrivée du jury — préparation (10 min)
 
 Vérifier que tout tourne. Si la machine vient d'être redémarrée :
 
@@ -39,7 +47,7 @@ Secret Jenkins : `docker exec jenkins-devops cat /var/jenkins_home/secrets/initi
 
 ---
 
-## 1. Le projet & l'architecture (2 min)
+## 1️⃣ Le projet & l'architecture (2 min)
 
 Dans un terminal :
 
@@ -54,7 +62,7 @@ Tableau récapitulatif de l'architecture → voir `RAPPORT.md`.
 
 ---
 
-## 2. Git — gestion du code (1 min)
+## 2️⃣ Git — gestion du code (1 min)
 
 ```bash
 cd ~/ecommerce-devops && git log --oneline | head -10
@@ -67,7 +75,7 @@ indépendant), l'historique qui documente les évolutions.
 
 ---
 
-## 3. Jenkins — 4 pipelines indépendants (3 min)
+## 3️⃣ Jenkins — 4 pipelines indépendants (3 min)
 
 Onglet Jenkins : les 4 jobs (`catalogue`, `panier`, `commandes`, `gateway`).
 
@@ -82,7 +90,7 @@ Déclencher manuellement un build de **catalogue** (bouton *Build Now*) pour la 
 
 ---
 
-## 4. Docker — build & publication des images (1,5 min)
+## 4️⃣ Docker — build & publication des images (1,5 min)
 
 Pendant que le build tourne, montrer :
 
@@ -96,7 +104,7 @@ Puis dans la console Jenkins : **"Push registre"** → digests poussés du build
 
 ---
 
-## 5. 🔥 LE point clé : déploiement de Catalogue v2 SANS les autres (4 min)
+## 5️⃣ 🔥 LE point clé : déploiement de Catalogue v2 SANS les autres (4 min)
 
 **Étape 1** — préparer l'écoute des pods dans un terminal (garder à l'écran) :
 
@@ -140,7 +148,7 @@ boutique http://localhost:30080 → ajouter au panier → commander → historiq
 
 ---
 
-## 6. Kubernetes — orchestration (1,5 min)
+## 6️⃣ Kubernetes — orchestration (1,5 min)
 
 ```bash
 kubectl get ns
@@ -154,7 +162,7 @@ kubectl -n ecommerce describe deploy catalogue | grep -A6 "Environment\|Probe" |
 
 ---
 
-## 7. Nagios — supervision individuelle (2,5 min)
+## 7️⃣ Nagios — supervision individuelle (2,5 min)
 
 Onglet Nagios : http://localhost:8082/nagios (login `nagiosadmin` / `nagios-admin`).
 
@@ -162,7 +170,7 @@ Onglet Nagios : http://localhost:8082/nagios (login `nagiosadmin` / `nagios-admi
   Gateway 30080) tous **OK**.
 - Cliquer un service → durée, sortie du check (TCP OK port 300XX).
 
-### 7.1 Alerte en live
+### 7.bis Alerte en live
 
 ```bash
 kubectl -n ecommerce scale deployment/panier --replicas=0
@@ -173,7 +181,7 @@ kubectl -n ecommerce scale deployment/panier --replicas=0
 Montrer que Catalogue/Commandes/Gateway restent OK grâce à la gateway
 "tolérante aux pannes" (readiness indépendante des services amonts).
 
-### 7.2 Retour à l'état normal
+### 7.3 Retour à l'état normal
 
 ```bash
 kubectl -n ecommerce scale deployment/panier --replicas=1
@@ -189,7 +197,7 @@ docker exec nagios grep "SERVICE ALERT" /opt/nagios/var/nagios.log | tail -5
 
 ---
 
-## 8. Questions prévisibles du jury — réponses
+## 8️⃣ Questions prévisibles du jury — réponses
 
 | Question | Réponse courte |
 |---|---|
@@ -202,7 +210,7 @@ docker exec nagios grep "SERVICE ALERT" /opt/nagios/var/nagios.log | tail -5
 
 ---
 
-## 9. Plan B — si l'environnement doit être reconstruit devant le jury
+## 9️⃣ Plan B — si l'environnement doit être reconstruit devant le jury
 
 ```bash
 make down && make cluster-up && make push-all && make deploy-all && sleep 60
