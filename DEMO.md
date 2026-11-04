@@ -38,12 +38,20 @@ curl -s -X POST http://localhost:30080/api/panier/cart/items \
 
 # 4) ouvrir les onglets :
 #    - Boutique    : http://localhost:30080
-#    - Jenkins     : http://localhost:8081  (admin / <initialAdminPassword>)
+#    - Jenkins     : http://localhost:8081  (admin / devops-2026)
 #    - Nagios      : http://localhost:8082/nagios (nagiosadmin / nagios-admin)
 #    - Terminal pret : terminal avec repo git + kubectl
 ```
 
-Secret Jenkins : `docker exec jenkins-devops cat /var/jenkins_home/secrets/initialAdminPassword`
+**Jenkins** : `admin / devops-2026` (réinitialisable via `infra/jenkins/reset-admin.groovy`)
+
+### 📸 Aperçu de la boutique (captures réelles de l'interface livrée par Jenkins)
+
+![Boutique NgShop](screenshots/ui-full.png)
+*Interface NgShop servie par la gateway (v1.0.2) : catalogue depuis le microservice catalogue, panier et historique depuis panier/commandes — tous trois derrière le point d'entrée unique :30080.*
+
+![Panier rempli](screenshots/ui-cart.png)
+*Panier rempli (badge 🧺 3, sous-total 318,80 €) et commandes déjà enregistrées par le microservice commandes.*
 
 ---
 
@@ -144,7 +152,8 @@ curl -s http://localhost:30081/healthz        # version: "2.0.0" (ou 3.0.0)
 ```
 
 **Étape 4** — l'application reste fonctionnelle pendant/après :
-boutique http://localhost:30080 → ajouter au panier → commander → historique.
+boutique http://localhost:30080 → ajouter au panier → commander → historique
+(captures réelles ci-dessus, section 📸 Aperçu).
 
 ---
 
@@ -169,6 +178,9 @@ Onglet Nagios : http://localhost:8082/nagios (login `nagiosadmin` / `nagios-admi
 - Menu **Services** : les 4 checks (Catalogue 30081, Panier 30082, Commandes 30083,
   Gateway 30080) tous **OK**.
 - Cliquer un service → durée, sortie du check (TCP OK port 300XX).
+
+![Nagios — 4 services OK](screenshots/nagios-services.png)
+*Capture réelle de la carte Nagios : 4 services supervisés individuellement, tous OK (`TCP Ok` sur chaque NodePort).*
 
 ### 7.bis Alerte en live
 

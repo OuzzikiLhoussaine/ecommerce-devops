@@ -114,6 +114,14 @@ Sur l'hôte dev (Linux + Docker) :
 | **commandes** | Passer une commande et consulter son historique | `POST /orders`, `GET /orders/:userId` | MongoDB dédiée (`mongo-commandes`), collection `orders` |
 | **gateway** | Point d'entrée unique + mini-frontend | `proxy /api/<svc>/*`, `/healthz`, `/readyz`, page statique | — |
 
+### Aperçu de la boutique livrée par la gateway (v1.0.2)
+
+![Boutique NgShop — catalogue, panier, commandes](screenshots/ui-full.png)
+*Interface servie par la gateway : le catalogue (cartes produits, prix, badges de stock) vient du microservice catalogue, le panier du microservice panier, l'historique du microservice commandes — le tout via le point d'entrée unique :30080.*
+
+![Panier rempli — badge et sous-total](screenshots/ui-cart.png)
+*Panier utilisateur (badge 🧺 3, sous-total 318,80 €) : chaque appel passe par la gateway qui propage `x-user-id` vers le microservice panier ; les commandes déjà passées sont listées par le microservice commandes.*
+
 ### 3.1 Pourquoi une base de données par service ?
 
 C'est le choix recommandé dans le cadre d'une architecture microservices, l'énoncé
@@ -291,6 +299,9 @@ SERVICE ALERT: kind-cluster;Microservice Panier;CRITICAL;HARD;Tenant à 30082 �
 SERVICE ALERT: kind-cluster;Microservice Panier;OK;HARD;TCP OK ← après scale --replicas=1
 ```
 
+![Carte Nagios — 4 services OK](screenshots/nagios-services.png)
+*Capture réelle de la carte « Service Status Details » : les 4 services (Gateway 30080, Catalogue 30081, Panier 30082, Commandes 30083) sont supervisés individuellement et remontent `TCP Ok` — le tableau du haut confirme 0 critical / 0 warning.*
+
 ---
 
 ## 8. Difficultés rencontrées et résolutions (valeur ajoutée)
@@ -334,7 +345,7 @@ déroulé de bout en bout dans notre environnement, comme l'attestent les commit
 | Panier direct | http://localhost:30082 | — |
 | Commandes direct | http://localhost:30083 | — |
 | Registre | http://localhost:5000 | — |
-| Jenkins | http://localhost:8081 | admin / voir initialAdminPassword |
+| Jenkins | http://localhost:8081 | admin / devops-2026 |
 | Nagios | http://localhost:8082/nagios | nagiosadmin / nagios-admin |
 
 ## Annexe B — Commandes résumées d'installation
