@@ -3,3 +3,10 @@ node_modules/
 .env
 infra/jenkins/kubeconfig
 .DS_Store
+
+# Livrables de soutenance - LOCAL UNIQUEMENT (jamais publies)
+RAPPORT_PRO.md
+RAPPORT_PRO.pdf
+RAPPORT_PRO_print.html
+PRESENTATION_SOUTENANCE.pdf
+PRESENTATION_print.html
