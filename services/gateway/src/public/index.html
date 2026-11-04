@@ -2,98 +2,319 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Boutique E-commerce (demo DevOps)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NgShop — boutique démo DevOps</title>
 <style>
-  body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; color: #222; }
-  header { display: flex; justify-content: space-between; align-items: center; }
-  h1 { font-size: 1.4rem; }
-  .user { font-size: .85rem; }
-  .card { border: 1px solid #ddd; border-radius: 8px; padding: .8rem 1rem; margin: .5rem 0; }
-  .price { color: #067a46; font-weight: bold; }
-  button { cursor: pointer; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-  section { margin-top: 2rem; }
-  .status { font-size: .8rem; color: #777; }
-  li { margin: .2rem 0; }
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --ink: #1c2333;
+    --muted: #6b7280;
+    --line: #e5e8f0;
+    --brand: #4f46e5;
+    --brand-ink: #ffffff;
+    --accent: #059669;
+    --danger: #dc2626;
+    --warn: #d97706;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: #ffffffcc; backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+  .nav {
+    display: flex; align-items: center; gap: 16px; height: 64px;
+  }
+  .logo { font-weight: 800; font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
+  .logo span.badge-dev { font-weight: 600; font-size: .68rem; color: var(--brand);
+    background: #eef2ff; border: 1px solid #c7d2fe; padding: 2px 8px; border-radius: 999px; }
+  .logo b { color: var(--brand); }
+  #userId {
+    border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px;
+    font: inherit; width: 130px; background: var(--card);
+  }
+  .spacer { flex: 1; }
+  .status {
+    font-size: .75rem; color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 12px; background: var(--card); white-space: nowrap;
+  }
+  .cartbtn {
+    position: relative; border: 0; cursor: pointer; color: var(--brand-ink);
+    background: var(--brand); border-radius: 999px; padding: 10px 18px;
+    font: inherit; font-weight: 700; box-shadow: var(--shadow);
+  }
+  .cartbtn .count {
+    position: absolute; top: -6px; right: -6px; background: var(--danger);
+    color: #fff; font-size: .7rem; font-weight: 800; line-height: 1;
+    border-radius: 999px; padding: 4px 7px; border: 2px solid #fff;
+  }
+
+  /* ---------- banner ---------- */
+  .hero {
+    max-width: 1100px; margin: 24px auto 0; padding: 0 20px;
+    display: flex; gap: 24px; align-items: center;
+  }
+  .hero h1 { margin: 0; font-size: 1.6rem; letter-spacing: -.02em; }
+  .hero p { margin: 6px 0 0; color: var(--muted); max-width: 640px; }
+
+  /* ---------- sections ---------- */
+  main.wrap { padding: 24px 20px 60px; }
+  section { margin-top: 28px; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .sec-head h2 { margin: 0; font-size: 1.15rem; }
+  .sec-head .hint { color: var(--muted); font-size: .8rem; }
+  .btn-ghost {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    border-radius: 10px; padding: 6px 12px; cursor: pointer; font: inherit; font-size: .85rem;
+  }
+  .btn-ghost:hover { border-color: var(--brand); color: var(--brand); }
+
+  /* ---------- catalogue ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .product {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px;
+    transition: transform .12s ease;
+  }
+  .product:hover { transform: translateY(-2px); }
+  .product .emoji { font-size: 2.4rem; line-height: 1; }
+  .product .name { font-weight: 700; }
+  .product .price { color: var(--accent); font-weight: 800; font-size: 1.05rem; }
+  .product .meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+  .stock {
+    font-size: .72rem; font-weight: 700; border-radius: 999px; padding: 4px 10px;
+    background: #ecfdf5; color: #065f46;
+  }
+  .stock.low { background: #fffbeb; color: #92400e; }
+  .add {
+    border: 0; background: var(--brand); color: #fff; font: inherit; font-weight: 700;
+    border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  }
+  .add:hover { filter: brightness(1.06); }
+
+  /* ---------- cart ---------- */
+  .cart-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 18px;
+  }
+  .line {
+    display: flex; align-items: center; gap: 12px; padding: 10px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .line:last-of-type { border-bottom: 0; }
+  .line .emoji { font-size: 1.4rem; }
+  .line .nm { flex: 1; font-weight: 600; }
+  .line .qty { color: var(--muted); font-size: .85rem; }
+  .line .sum { font-weight: 700; min-width: 84px; text-align: right; }
+  .rm {
+    border: 1px solid var(--line); background: #fff; color: var(--danger);
+    border-radius: 8px; cursor: pointer; padding: 5px 10px; font-size: .85rem;
+  }
+  .rm:hover { background: #fef2f2; }
+  .cart-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--line);
+  }
+  .total { font-size: 1.05rem; font-weight: 800; }
+  .checkout {
+    border: 0; cursor: pointer; font: inherit; font-weight: 800; color: #fff;
+    background: var(--accent); border-radius: 10px; padding: 11px 20px;
+  }
+  .checkout:disabled { opacity: .45; cursor: not-allowed; }
+  .empty { color: var(--muted); padding: 14px 0; }
+
+  /* ---------- orders ---------- */
+  .order {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 16px; margin-bottom: 12px;
+  }
+  .order .top { display: flex; justify-content: space-between; align-items: center; }
+  .order .ref { color: var(--muted); font-size: .75rem; }
+  .order .tot { font-weight: 800; color: var(--accent); }
+  .order ul { margin: 10px 0 0; padding-left: 20px; color: #374151; }
+  .order li { margin: 3px 0; }
+  .status-pill {
+    font-size: .7rem; font-weight: 700; border-radius: 999px; padding: 4px 10px;
+    background: #eef2ff; color: var(--brand);
+  }
+
+  /* ---------- footer / toasts ---------- */
+  footer {
+    border-top: 1px solid var(--line); background: var(--card);
+    color: var(--muted); font-size: .8rem; text-align: center; padding: 18px 20px;
+  }
+  #toasts { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
+  .toast {
+    background: var(--ink); color: #fff; border-radius: 10px; padding: 11px 16px;
+    font-size: .9rem; box-shadow: var(--shadow); animation: pop .18s ease;
+  }
+  .toast.err { background: var(--danger); }
+  .toast.ok { background: var(--accent); }
+  @keyframes pop { from { transform: scale(.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  @media (max-width: 640px) {
+    .hero { flex-direction: column; align-items: flex-start; padding: 0 16px; }
+    .nav { flex-wrap: wrap; height: auto; padding: 10px 0; }
+  }
 </style>
 </head>
 <body>
 <header>
-  <h1>🛒 Boutique — plateforme e-commerce simplifiée</h1>
-  <div class="user">
-    <label>Utilisateur: <input id="userId" value="client-1" size="10"></label>
-    <span class="status" id="gatewayStatus"></span>
+  <div class="wrap nav">
+    <div class="logo">🛒 <b>NgShop</b> <span class="badge-dev">DEMO MICROSERVICES</span></div>
+    <input id="userId" value="client-1" placeholder="utilisateur">
+    <div class="spacer"></div>
+    <span class="status" id="gatewayStatus">connexion…</span>
+    <button class="cartbtn" onclick="document.getElementById('cart').scrollIntoView({behavior:'smooth'})">
+      🧺 Panier <span class="count" id="cartCount">0</span>
+    </button>
   </div>
 </header>
 
-<section id="catalogue">
-  <h2>Catalogue <button onclick="loadProducts()">↻</button></h2>
-  <div id="products" class="grid"></div>
-</section>
+<div class="hero">
+  <h1>Bienvenue dans la boutique ✨</h1>
+  <p>Démo DevOps : 3 microservices (catalogue · panier · commandes) orchestrés sur Kubernetes, livrés par des pipelines Jenkins indépendants et supervisés par Nagios.</p>
+</div>
 
-<section id="cart">
-  <h2>🧺 Panier <button onclick="loadCart()">↻</button> <button onclick="checkout()">Passer commande</button></h2>
-  <div id="cartBox"></div>
-</section>
+<main class="wrap">
+  <section id="catalogue">
+    <div class="sec-head">
+      <h2>📦 Catalogue</h2>
+      <span class="hint" id="catSource">microservice catalogue :30081</span>
+      <button class="btn-ghost" onclick="loadProducts()">Recharger</button>
+    </div>
+    <div id="products" class="grid"></div>
+  </section>
 
-<section id="orders">
-  <h2>📦 Mes commandes <button onclick="loadOrders()">↻</button></h2>
-  <div id="ordersBox"></div>
-</section>
+  <section id="cart">
+    <div class="sec-head">
+      <h2>🧺 Mon panier</h2>
+      <span class="hint">microservice panier :30082</span>
+      <button class="btn-ghost" onclick="loadCart()">Recharger</button>
+    </div>
+    <div class="cart-card">
+      <div id="cartBox"></div>
+      <div class="cart-foot">
+        <div class="total">Sous-total : <span id="subtotal">0,00 €</span></div>
+        <button id="checkoutBtn" class="checkout" onclick="checkout()">Passer la commande ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="orders">
+    <div class="sec-head">
+      <h2>📦 Mes commandes</h2>
+      <span class="hint">microservice commandes :30083</span>
+      <button class="btn-ghost" onclick="loadOrders()">Recharger</button>
+    </div>
+    <div id="ordersBox"></div>
+  </section>
+</main>
+
+<footer>
+  🧰 stack : Node.js/Express · Docker · Kubernetes (kind) · Jenkins CI/CD · Nagios supervision —
+  <a href="https://github.com/OuzzikiLhoussaine/ecommerce-devops" style="color:var(--brand)">github.com/OuzzikiLhoussaine/ecommerce-devops</a>
+</footer>
+
+<div id="toasts"></div>
 
 <script>
 const $ = (id) => document.getElementById(id);
+const EMOJI = { 'P-001': '⌨️', 'P-002': '🖱️', 'P-003': '🎧', 'P-004': '🖥️', 'P-005': '🔌' };
+const emojiOf = (slug) => EMOJI[slug] || '🛍️';
 const userId = () => $('userId').value.trim() || 'guest';
 const h = (extra = {}) => ({ 'content-type': 'application/json', 'x-user-id': userId(), ...extra });
-const money = (n) => n.toFixed(2) + ' €';
+const money = (n) => Number(n).toFixed(2).replace('.', ',') + ' €';
 
-async function loadProducts() {
-  try {
-    const products = await (await fetch('/api/catalogue/products')).json();
-    $('products').innerHTML = '';
-    for (const p of products) {
-      const card = document.createElement('div');
-      card.className = 'card';
-      const name = document.createElement('b'); name.textContent = `${p.name}`;
-      const price = document.createElement('div'); price.className = 'price'; price.textContent = money(p.price);
-      const btn = document.createElement('button');
-      btn.textContent = 'Ajouter au panier';
-      btn.onclick = () => addToCart(p.id);
-      card.append(name, price, btn);
-      $('products').append(card);
-    }
-  } catch (e) { $('products').textContent = 'Catalogue indisponible'; }
+function toast(msg, kind = '') {
+  const t = document.createElement('div');
+  t.className = `toast ${kind}`;
+  t.textContent = msg;
+  $('toasts').append(t);
+  setTimeout(() => t.remove(), 3500);
 }
 
-async function addToCart(productId) {
-  await fetch('/api/panier/cart/items', {
-    method: 'POST', headers: h(),
-    body: JSON.stringify({ productId, quantity: 1 }),
-  });
-  await loadCart();
+async function loadProducts() {
+  const box = $('products');
+  try {
+    const products = await (await fetch('/api/catalogue/products')).json();
+    box.innerHTML = '';
+    for (const p of products) {
+      const card = document.createElement('div');
+      card.className = 'product';
+      const emoji = document.createElement('div'); emoji.className = 'emoji'; emoji.textContent = emojiOf(p.id);
+      const name = document.createElement('div'); name.className = 'name'; name.textContent = p.name;
+      const price = document.createElement('div'); price.className = 'price'; price.textContent = money(p.price);
+      const meta = document.createElement('div'); meta.className = 'meta';
+      const stock = document.createElement('span');
+      stock.className = 'stock' + (p.stock <= 10 ? ' low' : '');
+      stock.textContent = `stock ${p.stock}`;
+      const add = document.createElement('button');
+      add.className = 'add'; add.textContent = 'Ajouter';
+      add.onclick = () => addToCart(p.id, p.name);
+      meta.append(stock, add);
+      card.append(emoji, name, price, meta);
+      box.append(card);
+    }
+  } catch {
+    box.innerHTML = '';
+    box.textContent = '⚠️ Catalogue indisponible (microservice catalogue en panne ?)';
+    toast('Catalogue injoignable', 'err');
+  }
+}
+
+async function addToCart(productId, name) {
+  try {
+    const res = await fetch('/api/panier/cart/items', {
+      method: 'POST', headers: h(),
+      body: JSON.stringify({ productId, quantity: 1 }),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    toast(`🛍️ « ${name} » ajouté au panier`, 'ok');
+    await loadCart();
+  } catch {
+    toast('Panier injoignable (microservice panier en panne ?)', 'err');
+  }
 }
 
 async function loadCart() {
-  const cart = await (await fetch('/api/panier/cart', { headers: { 'x-user-id': userId() } })).json();
-  const box = $('cartBox');
-  box.innerHTML = '';
-  if (!cart.items.length) {
-    const p = document.createElement('p'); p.textContent = '(panier vide)';
-    box.append(p); return;
+  try {
+    const cart = await (await fetch('/api/panier/cart', { headers: { 'x-user-id': userId() } })).json();
+    const box = $('cartBox');
+    box.innerHTML = '';
+    const items = cart.items || [];
+    $('cartCount').textContent = items.reduce((s, i) => s + i.quantity, 0);
+    $('subtotal').textContent = money(cart.subtotal);
+    $('checkoutBtn').disabled = items.length === 0;
+    if (!items.length) {
+      const p = document.createElement('p'); p.className = 'empty';
+      p.textContent = 'Votre panier est vide — ajoutez un produit du catalogue 👆';
+      box.append(p); return;
+    }
+    for (const it of items) {
+      const line = document.createElement('div'); line.className = 'line';
+      const emoji = document.createElement('span'); emoji.className = 'emoji'; emoji.textContent = emojiOf(it.productId);
+      const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = it.name;
+      const qty = document.createElement('span'); qty.className = 'qty'; qty.textContent = `× ${it.quantity}`;
+      const sum = document.createElement('span'); sum.className = 'sum'; sum.textContent = money(it.price * it.quantity);
+      const rm = document.createElement('button'); rm.className = 'rm'; rm.textContent = 'retirer';
+      rm.onclick = () => removeFromCart(it.productId);
+      line.append(emoji, nm, qty, sum, rm);
+      box.append(line);
+    }
+  } catch {
+    $('cartBox').innerHTML = '<p class="empty">⚠️ Panier non disponible</p>';
   }
-  const ul = document.createElement('ul');
-  for (const it of cart.items) {
-    const li = document.createElement('li');
-    li.textContent = `${it.name} × ${it.quantity} — ${money(it.price * it.quantity)}  `;
-    const rm = document.createElement('button'); rm.textContent = 'retirer';
-    rm.onclick = () => removeFromCart(it.productId);
-    li.append(rm);
-    ul.append(li);
-  }
-  box.append(ul);
-  const subtotal = document.createElement('p');
-  subtotal.innerHTML = `Sous-total : <b>${money(cart.subtotal)}</b>`;
-  box.append(subtotal);
 }
 
 async function removeFromCart(productId) {
@@ -101,44 +322,74 @@ async function removeFromCart(productId) {
   await loadCart();
 }
 
-// Checkout: panier -> commandes, puis panier vide
+// Checkout: panier -> commande (microservice commandes), puis panier vidé
 async function checkout() {
-  const cart = await (await fetch('/api/panier/cart', { headers: { 'x-user-id': userId() } })).json();
-  if (!cart.items.length) return alert('Panier vide');
-  await fetch('/api/commandes/orders', {
-    method: 'POST', headers: h(),
-    body: JSON.stringify({ userId: userId(), items: cart.items }),
-  });
-  await fetch('/api/panier/cart', { method: 'DELETE', headers: { 'x-user-id': userId() } });
-  await loadCart(); await loadOrders();
-}
-
-async function loadOrders() {
-  const orders = await (await fetch(`/api/commandes/orders/${userId()}`)).json();
-  const box = $('ordersBox');
-  box.innerHTML = '';
-  if (!orders.length) { box.textContent = '(aucune commande)'; return; }
-  for (const o of orders) {
-    const card = document.createElement('div');
-    card.className = 'card';
-    const head = document.createElement('b');
-    head.textContent = `${new Date(o.createdAt).toLocaleString()} — ${money(o.total)}`;
-    const ul = document.createElement('ul');
-    for (const it of o.items) {
-      const li = document.createElement('li');
-      li.textContent = `${it.name} × ${it.quantity}`;
-      ul.append(li);
-    }
-    card.append(head, ul);
-    box.append(card);
+  const btn = $('checkoutBtn');
+  btn.disabled = true;
+  try {
+    const cart = await (await fetch('/api/panier/cart', { headers: { 'x-user-id': userId() } })).json();
+    if (!cart.items || !cart.items.length) { toast('Panier vide', 'err'); return; }
+    const res = await fetch('/api/commandes/orders', {
+      method: 'POST', headers: h(),
+      body: JSON.stringify({ userId: userId(), items: cart.items }),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const order = await res.json();
+    toast(`✅ Commande ${order.id.slice(0, 8)}… validée — total ${money(order.total)}`, 'ok');
+    await fetch('/api/panier/cart', { method: 'DELETE', headers: { 'x-user-id': userId() } });
+    await loadCart(); await loadOrders();
+  } catch {
+    toast('Commandes injoignables (microservice commandes en panne ?)', 'err');
+  } finally {
+    btn.disabled = false;
+    await loadCart();
   }
 }
 
-addEventListener('change', () => { loadCart(); loadOrders(); });
+async function loadOrders() {
+  try {
+    const orders = await (await fetch(`/api/commandes/orders/${userId()}`)).json();
+    const box = $('ordersBox');
+    box.innerHTML = '';
+    if (!orders.length) {
+      box.innerHTML = '<p class="empty">Aucune commande pour l\'instant</p>';
+      return;
+    }
+    for (const o of orders) {
+      const card = document.createElement('div'); card.className = 'order';
+      const top = document.createElement('div'); top.className = 'top';
+      const left = document.createElement('div');
+      const l1 = document.createElement('b'); l1.textContent = new Date(o.createdAt).toLocaleString('fr-FR');
+      const ref = document.createElement('div'); ref.className = 'ref'; ref.textContent = `#${o.id}`;
+      left.append(l1, ref);
+      const right = document.createElement('div'); right.style.textAlign = 'right';
+      const pill = document.createElement('span'); pill.className = 'status-pill'; pill.textContent = o.status;
+      const tot = document.createElement('div'); tot.className = 'tot'; tot.textContent = money(o.total);
+      right.append(pill, tot);
+      top.append(left, right);
+      const ul = document.createElement('ul');
+      for (const it of o.items) {
+        const li = document.createElement('li');
+        li.textContent = `${emojiOf(it.productId)} ${it.name} × ${it.quantity} — ${money(it.price * it.quantity)}`;
+        ul.append(li);
+      }
+      card.append(top, ul);
+      box.append(card);
+    }
+  } catch {
+    $('ordersBox').innerHTML = '<p class="empty">⚠️ Historique non disponible</p>';
+  }
+}
+
 (async () => {
-  const r = await (await fetch('/healthz')).json();
-  $('gatewayStatus').textContent = `${r.service} v${r.version}`;
+  try {
+    const r = await (await fetch('/healthz')).json();
+    $('gatewayStatus').textContent = `gateway v${r.version} · READY`;
+  } catch {
+    $('gatewayStatus').textContent = 'gateway injoignable';
+  }
 })();
+$('userId').addEventListener('change', () => { loadCart(); loadOrders(); });
 loadProducts(); loadCart(); loadOrders();
 </script>
 </body>
